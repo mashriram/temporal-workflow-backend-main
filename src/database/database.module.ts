@@ -4,8 +4,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WorkflowDefinition } from '../workflows/entities/workflow-definition.entity';
 import { WorkflowRun } from '../workflows/entities/workflow-run.entity';
 import { AuditLog } from '../audit/entities/audit.entity';
+import { Environment } from '../environments/entities/environment.entity';
+import { EnvironmentVariable } from '../environments/entities/environment-variable.entity';
 
-const ENTITIES = [WorkflowDefinition, WorkflowRun, AuditLog];
+const ENTITIES = [
+  WorkflowDefinition,
+  WorkflowRun,
+  AuditLog,
+  Environment,
+  EnvironmentVariable,
+];
 
 @Module({
   imports: [

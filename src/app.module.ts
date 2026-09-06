@@ -11,6 +11,7 @@ import { AuditModule } from './audit/audit.module';
 import { CommonModule } from './common/common.module';
 import { VoiceModule } from './voice/voice.module';
 import { DatabaseModule } from './database/database.module';
+import { EnvironmentsModule } from './environments/environments.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DatabaseModule } from './database/database.module';
     AuditModule,
     CommonModule,
     VoiceModule,
+    EnvironmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

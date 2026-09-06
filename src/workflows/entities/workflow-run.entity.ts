@@ -67,6 +67,10 @@ export class WorkflowRun {
   @Column({ default: 'WEBHOOK' })
   triggerType: 'WEBHOOK' | 'SCHEDULE' | 'MANUAL';
 
+  // Which environment this specific run executed against.
+  @Column({ type: 'varchar', nullable: true })
+  environmentId: string | null;
+
   // --------------------------------------------------------
   // 3. RELATIONS
   // --------------------------------------------------------

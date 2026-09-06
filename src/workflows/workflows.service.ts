@@ -86,7 +86,7 @@ export class WorkflowsService {
    * 3. Configures Temporal (Schedule) if needed.
    */
   async deployWorkflow(dto: DeployWorkflowDto) {
-    const { workflowId, steps, startAt } = dto;
+    const { workflowId, steps, startAt, environmentId } = dto;
     this.logger.log(`🚀 Deploying Workflow: ${workflowId}`);
 
     // 1. Fetch Entity
@@ -154,6 +154,7 @@ export class WorkflowsService {
             isActive: true,
             triggerType: 'SCHEDULE',
             cronExpression: cron,
+            environmentId: environmentId ?? null,
             deployedGraph: executionSnapshot,
           },
         );
@@ -183,6 +184,7 @@ export class WorkflowsService {
           isActive: true,
           triggerType: 'WEBHOOK',
           cronExpression: null,
+          environmentId: environmentId ?? null,
           deployedGraph: executionSnapshot,
         },
       );

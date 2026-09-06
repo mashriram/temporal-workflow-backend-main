@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
@@ -15,7 +16,8 @@ async function bootstrap() {
   app.enableCors();
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  await app.listen(3000);
-  console.log(`🌍 API Server ready at http://localhost:3000`);
+  const port = app.get(ConfigService).get<number>('PORT') || 3000;
+  await app.listen(port);
+  console.log(`🌍 API Server ready at http://localhost:${port}`);
 }
 bootstrap();

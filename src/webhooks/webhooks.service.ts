@@ -62,6 +62,7 @@ export class WebhooksService {
       workflowId: definition.workflowId,
       startAt: graph.startAt,
       steps: graph.steps,
+      environmentId: definition.environmentId ?? undefined,
       initialState: {
         [graph.startAt]: {
           ...context,
@@ -91,6 +92,7 @@ export class WebhooksService {
         input: context,
         startedAt: new Date(),
         definition: definition,
+        environmentId: definition.environmentId ?? null,
       });
 
       await this.workflowRunRepo.save(workflowRun);

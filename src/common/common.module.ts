@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common';
+import { SecretCipherService } from './crypto/secret-cipher.service';
 
-@Module({})
+@Module({
+  providers: [SecretCipherService],
+  exports: [SecretCipherService],
+})
 export class CommonModule {}

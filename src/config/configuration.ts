@@ -23,4 +23,7 @@ export default () => ({
     sqljsFile: process.env.DB_SQLJS_FILE || './data/app.sqlite',
     oracleSid: process.env.DB_ORACLE_SID,
   },
+
+  // 4. Secrets-at-rest key for EnvironmentVariable encryption (never in DB).
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
 });

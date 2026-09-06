@@ -41,4 +41,9 @@ export const validationSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.optional(),
   }),
+
+  // Secrets-at-rest key for EnvironmentVariable encryption. Optional so dev
+  // boots don't hard-fail, but SecretCipherService logs a loud warning and
+  // uses an insecure fallback if this is unset — never rely on that in prod.
+  ENCRYPTION_KEY: Joi.string().optional(),
 });

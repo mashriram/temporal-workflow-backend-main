@@ -72,6 +72,13 @@ export class WorkflowDefinition {
   @Column({ type: 'text', nullable: true })
   cronExpression: string | null;
 
+  // Default/last-used environment for this workflow's runs. A workflow
+  // definition never hardcodes environment-specific values itself (see
+  // {{env.X}} templating) — this is just a UX convenience default, always
+  // overridable per run once a manual "start run" flow exists.
+  @Column({ type: 'varchar', nullable: true })
+  environmentId: string | null;
+
   // -----------------------------------------------------------------
   // 5. HISTORY
   // -----------------------------------------------------------------
