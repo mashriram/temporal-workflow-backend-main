@@ -88,4 +88,13 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
       'Add a secret Environment variable (default name ELK_TOKEN) ' +
       'holding an API key or bearer token for your cluster.',
   },
+  {
+    id: 'gitlab',
+    label: 'GitLab (pipelines + merge requests)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add a secret Environment variable (default name GITLAB_TOKEN) ' +
+      'holding a personal or project access token with api scope.',
+  },
 ];
