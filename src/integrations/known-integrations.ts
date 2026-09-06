@@ -51,4 +51,14 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
       'client-credentials token endpoint, scoped to Mail.ReadWrite and ' +
       'Mail.Read only — never grant Mail.Send.',
   },
+  {
+    id: 'servicenow',
+    label: 'ServiceNow (Table API)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add SERVICENOW_USERNAME (static) and SERVICENOW_PASSWORD (secret) ' +
+      'Environment variables for Basic Auth against your instance\'s ' +
+      'Table API; set the instance URL per-node.',
+  },
 ];
