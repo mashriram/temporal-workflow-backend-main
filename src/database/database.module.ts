@@ -7,6 +7,8 @@ import { AuditLog } from '../audit/entities/audit.entity';
 import { Environment } from '../environments/entities/environment.entity';
 import { EnvironmentVariable } from '../environments/entities/environment-variable.entity';
 import { IntegrationConfig } from '../integrations/entities/integration-config.entity';
+import { ApprovalRequest } from '../approvals/entities/approval-request.entity';
+import { UploadedFile } from '../uploads/entities/uploaded-file.entity';
 
 const ENTITIES = [
   WorkflowDefinition,
@@ -15,6 +17,8 @@ const ENTITIES = [
   Environment,
   EnvironmentVariable,
   IntegrationConfig,
+  ApprovalRequest,
+  UploadedFile,
 ];
 
 @Module({
