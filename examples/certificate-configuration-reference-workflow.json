@@ -1,0 +1,156 @@
+{
+  "id": "cert-config-reference",
+  "workflowId": "REPLACE_WITH_WORKFLOW_ID_FROM_CREATE_RESPONSE",
+  "startAt": "start",
+  "steps": {
+    "start": {
+      "id": "start",
+      "name": "Start",
+      "type": "trigger_start",
+      "params": {},
+      "next": "check_enc_dec",
+      "branches": {}
+    },
+    "check_enc_dec": {
+      "id": "check_enc_dec",
+      "name": "Check Encrypt/Decrypt cert present",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/check",
+        "body": "{\"certType\":\"encrypt-decrypt\"}"
+      },
+      "next": "cond_enc_dec",
+      "branches": {}
+    },
+    "cond_enc_dec": {
+      "id": "cond_enc_dec",
+      "name": "Encrypt/Decrypt cert present?",
+      "type": "logic_condition",
+      "params": {
+        "variable": "check_enc_dec.data.present",
+        "operator": "==",
+        "value": "true"
+      },
+      "next": null,
+      "branches": { "true": "register_encrypt", "false": "end" }
+    },
+    "register_encrypt": {
+      "id": "register_encrypt",
+      "name": "Register Encrypt/Decrypt cert",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/register",
+        "body": "{\"type\":\"encrypt-decrypt\"}"
+      },
+      "next": "clone_access",
+      "branches": {}
+    },
+    "clone_access": {
+      "id": "clone_access",
+      "name": "Clone access",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/clone-access",
+        "body": "{}"
+      },
+      "next": "push_jwks_encdec",
+      "branches": {}
+    },
+    "push_jwks_encdec": {
+      "id": "push_jwks_encdec",
+      "name": "Push Encrypt/Decrypt to JWKS",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/jwks/push",
+        "body": "{\"certType\":\"encrypt-decrypt\"}"
+      },
+      "next": "check_sign_verify",
+      "branches": {}
+    },
+    "check_sign_verify": {
+      "id": "check_sign_verify",
+      "name": "Check Sign/Verify cert present",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/check",
+        "body": "{\"certType\":\"sign-verify\"}"
+      },
+      "next": "cond_sign_verify",
+      "branches": {}
+    },
+    "cond_sign_verify": {
+      "id": "cond_sign_verify",
+      "name": "Sign/Verify cert present?",
+      "type": "logic_condition",
+      "params": {
+        "variable": "check_sign_verify.data.present",
+        "operator": "==",
+        "value": "true"
+      },
+      "next": null,
+      "branches": { "true": "register_verify", "false": "end" }
+    },
+    "register_verify": {
+      "id": "register_verify",
+      "name": "Register Verify cert",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/register",
+        "body": "{\"type\":\"verify\"}"
+      },
+      "next": "hitl_gate",
+      "branches": {}
+    },
+    "hitl_gate": {
+      "id": "hitl_gate",
+      "name": "Confirm Sign cert upload with partner",
+      "type": "hitl_approval",
+      "params": {
+        "title": "Confirm Sign cert upload with partner",
+        "instructions": "Communicate with the partner outside this system, obtain their confirmation the Sign certificate can be issued, then upload proof and click Verified. This gate never auto-advances.",
+        "requireProofUpload": true,
+        "draftEmailIntegration": "none"
+      },
+      "next": "register_sign",
+      "branches": {}
+    },
+    "register_sign": {
+      "id": "register_sign",
+      "name": "Register Sign cert",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/register",
+        "body": "{\"type\":\"sign\"}"
+      },
+      "next": "push_jwks_sign",
+      "branches": {}
+    },
+    "push_jwks_sign": {
+      "id": "push_jwks_sign",
+      "name": "Push Sign to JWKS",
+      "type": "make_http_call",
+      "params": {
+        "method": "POST",
+        "url": "http://localhost:4790/jwks/push",
+        "body": "{\"certType\":\"sign\"}"
+      },
+      "next": "end",
+      "branches": {}
+    },
+    "end": {
+      "id": "end",
+      "name": "End",
+      "type": "trigger_end",
+      "params": {},
+      "next": null,
+      "branches": {}
+    }
+  }
+}
