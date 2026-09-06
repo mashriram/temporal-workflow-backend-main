@@ -14,6 +14,7 @@ import { WorkflowDefinition } from 'src/workflows/entities/workflow-definition.e
 import { WorkflowRun } from 'src/workflows/entities/workflow-run.entity';
 import { WebhookContext } from './webhooks.types';
 import { ConfigService } from '@nestjs/config';
+import { IntegrationsService } from 'src/integrations/integrations.service';
 
 @Injectable()
 export class WebhooksService {
@@ -26,6 +27,7 @@ export class WebhooksService {
     @InjectRepository(WorkflowRun)
     private readonly workflowRunRepo: Repository<WorkflowRun>,
     private readonly configService: ConfigService,
+    private readonly integrationsService: IntegrationsService,
   ) {}
 
   async triggerWebhook(workflowId: string, context: WebhookContext) {
@@ -58,11 +60,13 @@ export class WebhooksService {
 
     // 2. Prepare Temporal Payload
     const uniqueRunId = `${workflowId}-${uuidv4()}`;
+    const enabledIntegrations = await this.integrationsService.enabledIds();
     const runtimePayload = {
       workflowId: definition.workflowId,
       startAt: graph.startAt,
       steps: graph.steps,
       environmentId: definition.environmentId ?? undefined,
+      enabledIntegrations,
       initialState: {
         [graph.startAt]: {
           ...context,

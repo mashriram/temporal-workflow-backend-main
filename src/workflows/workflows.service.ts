@@ -6,6 +6,7 @@ import { WorkflowDefinition } from './entities/workflow-definition.entity';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
 import { DeployWorkflowDto } from './dto/deploy-workflow.dto';
 import { ConfigService } from '@nestjs/config';
+import { IntegrationsService } from 'src/integrations/integrations.service';
 
 @Injectable()
 export class WorkflowsService {
@@ -16,6 +17,7 @@ export class WorkflowsService {
     @InjectRepository(WorkflowDefinition)
     private readonly workflowsRepository: Repository<WorkflowDefinition>,
     private readonly configService: ConfigService,
+    private readonly integrationsService: IntegrationsService,
   ) {}
 
   // =================================================================
@@ -133,13 +135,18 @@ export class WorkflowsService {
           console.log(`Schedule doesn't exist.. proceeding: ${e}`);
         }
 
+        // Snapshotted at schedule-creation time, same as the rest of this
+        // action's args — re-deploy the schedule after toggling an
+        // integration for a cron-triggered workflow to pick up the change.
+        const enabledIntegrations = await this.integrationsService.enabledIds();
+
         await this.temporalClient.schedule.create({
           scheduleId: scheduleId,
           spec: { cronExpressions: [cron] },
           action: {
             type: 'startWorkflow',
             workflowType: 'InterpreterWorkflow',
-            args: [dto],
+            args: [{ ...dto, enabledIntegrations }],
             taskQueue: 'agentic-workflow-queue',
             workflowId: `${workflowId}-cron`,
           },
