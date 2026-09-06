@@ -1,18 +1,27 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  BeforeInsert,
 } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { WorkflowRun } from './workflow-run.entity';
 import { WorkflowEdge, WorkflowNode } from '../workflow.types';
 
 @Entity('workflow_definitions')
 export class WorkflowDefinition {
-  @PrimaryGeneratedColumn('uuid')
+  // App-generated id (not DB-native uuid generation) — portable across
+  // sql.js, Postgres, and Oracle identically.
+  @PrimaryColumn('varchar', { length: 36 })
   id: string;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) this.id = uuidv4();
+  }
 
   @Column({ unique: true })
   workflowId: string;
@@ -35,16 +44,20 @@ export class WorkflowDefinition {
   // -----------------------------------------------------------------
   // 2. BLUEPRINT (UI Editor State)
   // -----------------------------------------------------------------
-  @Column('jsonb', { default: [] })
-  nodes: WorkflowNode[];
+  // No DB-level `default` on simple-json — that requires dialect-specific
+  // default-value SQL (works differently across sql.js/Postgres/Oracle);
+  // a TS field initializer is portable and sufficient since these are
+  // always set by the service on create.
+  @Column('simple-json')
+  nodes: WorkflowNode[] = [];
 
-  @Column('jsonb', { default: [] })
-  edges: WorkflowEdge[];
+  @Column('simple-json')
+  edges: WorkflowEdge[] = [];
 
   // -----------------------------------------------------------------
   // 3. EXECUTION SNAPSHOT (The "Compiled" Version)
   // -----------------------------------------------------------------
-  @Column('jsonb', { nullable: true })
+  @Column('simple-json', { nullable: true })
   deployedGraph: {
     steps: Record<string, any>;
     startAt: string;

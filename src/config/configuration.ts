@@ -14,10 +14,13 @@ export default () => ({
 
   // 3. Database Config (Secrets)
   database: {
+    type: process.env.DB_TYPE || 'postgres', // 'sqljs' | 'postgres' | 'oracle'
     host: process.env.DB_HOST,
     port: process.env.DB_PORT ? Number.parseInt(process.env.DB_PORT, 10) : 5432,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     name: process.env.DB_NAME,
+    sqljsFile: process.env.DB_SQLJS_FILE || './data/app.sqlite',
+    oracleSid: process.env.DB_ORACLE_SID,
   },
 });

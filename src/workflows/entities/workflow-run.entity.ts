@@ -1,19 +1,26 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
   Index,
   JoinColumn,
+  BeforeInsert,
 } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { WorkflowDefinition } from './workflow-definition.entity';
 
 @Entity('workflow_runs')
 export class WorkflowRun {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('varchar', { length: 36 })
   id: string;
+
+  @BeforeInsert()
+  generateId() {
+    if (!this.id) this.id = uuidv4();
+  }
 
   // --------------------------------------------------------
   // 1. TEMPORAL LINKS
@@ -36,11 +43,11 @@ export class WorkflowRun {
   status: 'RUNNING' | 'COMPLETED' | 'FAILED' | 'TERMINATED';
 
   // Snapshot of input (Webhook body, etc.)
-  @Column('jsonb', { nullable: true })
+  @Column('simple-json', { nullable: true })
   input: any;
 
   // Snapshot of final output
-  @Column('jsonb', { nullable: true })
+  @Column('simple-json', { nullable: true })
   output: any;
 
   // ✅ ADDITION 1: Explicit Error Column
@@ -52,8 +59,8 @@ export class WorkflowRun {
   // ✅ ADDITION 2: Searchable Metadata / Context
   // Store business keys here (e.g., { "email": "user@gmail.com", "leadId": "123" }).
   // This allows you to build a "Search Runs by Email" feature in your UI.
-  @Column('jsonb', { default: {} })
-  metadata: Record<string, any>;
+  @Column('simple-json')
+  metadata: Record<string, any> = {};
 
   // ✅ ADDITION 3: Trigger Context
   // Helps you show in the UI: "Started by Cron" vs "Started by Webhook"

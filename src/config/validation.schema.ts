@@ -7,10 +7,38 @@ export const validationSchema = Joi.object({
     .valid('development', 'production', 'test')
     .default('development'),
 
-  // Database (Fail if these are missing)
-  DB_HOST: Joi.string().required(),
+  // Database driver selection — zero code branching, config only.
+  DB_TYPE: Joi.string()
+    .valid('sqljs', 'postgres', 'oracle')
+    .default('postgres'),
+
+  // Required only when actually connecting to a server DB. sql.js (office
+  // dev, no Docker/native drivers) needs none of these.
+  DB_HOST: Joi.string().when('DB_TYPE', {
+    is: Joi.valid('postgres', 'oracle'),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
   DB_PORT: Joi.number().default(5432),
-  DB_USERNAME: Joi.string().required(),
-  DB_PASSWORD: Joi.string().required(),
-  DB_NAME: Joi.string().required(),
+  DB_USERNAME: Joi.string().when('DB_TYPE', {
+    is: Joi.valid('postgres', 'oracle'),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  DB_PASSWORD: Joi.string().when('DB_TYPE', {
+    is: Joi.valid('postgres', 'oracle'),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  DB_NAME: Joi.string().when('DB_TYPE', {
+    is: Joi.valid('postgres', 'oracle'),
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  DB_SQLJS_FILE: Joi.string().optional(),
+  DB_ORACLE_SID: Joi.string().when('DB_TYPE', {
+    is: 'oracle',
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
 });
