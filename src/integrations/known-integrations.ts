@@ -61,4 +61,31 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
       'Environment variables for Basic Auth against your instance\'s ' +
       'Table API; set the instance URL per-node.',
   },
+  {
+    id: 'appdynamics',
+    label: 'AppDynamics (read-only: metrics + health rules)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add a secret Environment variable (default name APPD_TOKEN) ' +
+      'holding a Controller API bearer token.',
+  },
+  {
+    id: 'openshift',
+    label: 'OpenShift / Kubernetes (read-only: pods + rollouts)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add a secret Environment variable (default name OPENSHIFT_TOKEN) ' +
+      'holding a ServiceAccount or OAuth bearer token, scoped read-only.',
+  },
+  {
+    id: 'elk',
+    label: 'ELK / Kibana (read-only: log search + alert status)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add a secret Environment variable (default name ELK_TOKEN) ' +
+      'holding an API key or bearer token for your cluster.',
+  },
 ];
