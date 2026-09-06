@@ -29,6 +29,24 @@ export class WorkflowDefinition {
   @Column()
   name: string;
 
+  // Scopes workflows to a user (Phase 7 auth). Nullable so any
+  // pre-existing rows from before auth landed keep working.
+  //
+  // IMPORTANT: this entity is intentionally duplicated in the engine repo
+  // (src/entity/workflow-definition.entity.ts) against the SAME physical
+  // table — keep both copies in lockstep, see implementation.md §10.
+  @Column({ type: 'varchar', nullable: true })
+  ownerId: string | null;
+
+  // Comma-separated under the hood (simple-array) — cross-DB-safe, same
+  // reasoning as every other TypeORM column type choice in this codebase.
+  // Nullable: a NOT NULL simple-array can't be added via synchronize to a
+  // table that already has rows (no portable DB-level default across
+  // sql.js/Postgres/Oracle) — normalize null -> [] in the service layer
+  // instead of relying on a DB default.
+  @Column('simple-array', { nullable: true })
+  tags: string[] | null;
+
   // -----------------------------------------------------------------
   // 1. LIFECYCLE STATE
   // -----------------------------------------------------------------

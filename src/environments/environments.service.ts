@@ -34,8 +34,8 @@ export class EnvironmentsService {
   // CRUD
   // =================================================================
 
-  async create(dto: CreateEnvironmentDto) {
-    const env = this.environmentRepo.create({ name: dto.name });
+  async create(dto: CreateEnvironmentDto, ownerId: string) {
+    const env = this.environmentRepo.create({ name: dto.name, ownerId });
     return this.environmentRepo.save(env);
   }
 
@@ -47,26 +47,34 @@ export class EnvironmentsService {
    * redacted shape) to the client. Never call environmentRepo.find()
    * directly from a controller-facing method again.
    */
-  async findAll() {
+  async findAll(ownerId: string) {
     const envs = await this.environmentRepo.find({
+      where: { ownerId },
       relations: ['variables'],
       order: { createdAt: 'ASC' },
     });
     return envs.map((env) => this.redactEnvironment(env));
   }
 
-  async findOne(id: string) {
+  // ownerId is omitted for the engine's own resolve-time lookups (that
+  // call carries no user token — see the @Public() route) and included
+  // for every UI-facing call so a user can't read/mutate another user's
+  // environment by guessing its id.
+  async findOne(id: string, ownerId?: string) {
     const env = await this.environmentRepo.findOne({
       where: { id },
       relations: ['variables'],
     });
     if (!env) throw new NotFoundException(`Environment ${id} not found`);
+    if (ownerId !== undefined && env.ownerId !== ownerId) {
+      throw new NotFoundException(`Environment ${id} not found`);
+    }
     return env;
   }
 
   /** Same as findOne(), but never leaks decrypted secret values to the UI. */
-  async findOneRedacted(id: string) {
-    const env = await this.findOne(id);
+  async findOneRedacted(id: string, ownerId?: string) {
+    const env = await this.findOne(id, ownerId);
     return this.redactEnvironment(env);
   }
 
@@ -77,14 +85,18 @@ export class EnvironmentsService {
     };
   }
 
-  async remove(id: string) {
-    const env = await this.findOne(id);
+  async remove(id: string, ownerId: string) {
+    const env = await this.findOne(id, ownerId);
     await this.environmentRepo.remove(env);
     return { success: true };
   }
 
-  async upsertVariable(environmentId: string, dto: UpsertVariableDto) {
-    const env = await this.findOne(environmentId);
+  async upsertVariable(
+    environmentId: string,
+    dto: UpsertVariableDto,
+    ownerId: string,
+  ) {
+    const env = await this.findOne(environmentId, ownerId);
 
     let variable: EnvironmentVariable | undefined;
     if (dto.id) {
@@ -117,7 +129,12 @@ export class EnvironmentsService {
     return this.redactVariable(saved);
   }
 
-  async removeVariable(environmentId: string, variableId: string) {
+  async removeVariable(
+    environmentId: string,
+    variableId: string,
+    ownerId: string,
+  ) {
+    await this.findOne(environmentId, ownerId); // ownership check
     const variable = await this.variableRepo.findOne({
       where: { id: variableId, environmentId },
     });

@@ -46,4 +46,9 @@ export const validationSchema = Joi.object({
   // boots don't hard-fail, but SecretCipherService logs a loud warning and
   // uses an insecure fallback if this is unset — never rely on that in prod.
   ENCRYPTION_KEY: Joi.string().optional(),
+
+  // JWT signing secret for auth. Same story as ENCRYPTION_KEY — optional
+  // for dev, AuthModule logs a loud warning and uses an insecure fallback
+  // if unset. Never rely on the fallback in prod.
+  JWT_SECRET: Joi.string().optional(),
 });

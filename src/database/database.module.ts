@@ -9,6 +9,8 @@ import { EnvironmentVariable } from '../environments/entities/environment-variab
 import { IntegrationConfig } from '../integrations/entities/integration-config.entity';
 import { ApprovalRequest } from '../approvals/entities/approval-request.entity';
 import { UploadedFile } from '../uploads/entities/uploaded-file.entity';
+import { User } from '../auth/entities/user.entity';
+import { WorkflowVersion } from '../workflows/entities/workflow-version.entity';
 
 const ENTITIES = [
   WorkflowDefinition,
@@ -19,6 +21,8 @@ const ENTITIES = [
   IntegrationConfig,
   ApprovalRequest,
   UploadedFile,
+  User,
+  WorkflowVersion,
 ];
 
 @Module({
