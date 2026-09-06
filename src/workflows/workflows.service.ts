@@ -57,7 +57,13 @@ export class WorkflowsService {
    * Updates the UI definition (Draft Mode).
    * Does NOT affect the live running version.
    */
-  async updateDraft(id: string, nodes: any[], edges: any[], ownerId: string) {
+  async updateDraft(
+    id: string,
+    nodes: any[],
+    edges: any[],
+    ownerId: string,
+    tags?: string[],
+  ) {
     const workflow = await this.findOne(id, ownerId);
     if (!workflow) throw new NotFoundException('Workflow not found');
 
@@ -67,6 +73,7 @@ export class WorkflowsService {
         nodes,
         edges,
         status: 'DRAFT', // ✅ Important: Mark as DRAFT because UI changed vs Deployed version
+        ...(tags !== undefined ? { tags } : {}),
       },
     );
     await this.recordVersion(workflow.workflowId, nodes, edges, ownerId);
@@ -193,6 +200,7 @@ export class WorkflowsService {
           runCount,
           lastRunStatus: lastRun?.status || null,
           lastRunAt: lastRun?.startedAt || null,
+          lastRunId: lastRun?.temporalRunId || null,
         };
       }),
     );

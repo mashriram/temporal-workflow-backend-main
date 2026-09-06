@@ -101,7 +101,7 @@ export class WorkflowsController {
   @Patch(':id')
   async updateDraft(
     @Param('id') id: string,
-    @Body() body: { nodes: any[]; edges: any[] },
+    @Body() body: { nodes: any[]; edges: any[]; tags?: string[] },
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return await this.workflowsService.updateDraft(
@@ -109,6 +109,7 @@ export class WorkflowsController {
       body.nodes,
       body.edges,
       user.id,
+      body.tags,
     );
   }
 
