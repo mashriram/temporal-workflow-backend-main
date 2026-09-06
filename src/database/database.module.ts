@@ -6,6 +6,7 @@ import { WorkflowRun } from '../workflows/entities/workflow-run.entity';
 import { AuditLog } from '../audit/entities/audit.entity';
 import { Environment } from '../environments/entities/environment.entity';
 import { EnvironmentVariable } from '../environments/entities/environment-variable.entity';
+import { IntegrationConfig } from '../integrations/entities/integration-config.entity';
 
 const ENTITIES = [
   WorkflowDefinition,
@@ -13,6 +14,7 @@ const ENTITIES = [
   AuditLog,
   Environment,
   EnvironmentVariable,
+  IntegrationConfig,
 ];
 
 @Module({

@@ -12,6 +12,7 @@ import { CommonModule } from './common/common.module';
 import { VoiceModule } from './voice/voice.module';
 import { DatabaseModule } from './database/database.module';
 import { EnvironmentsModule } from './environments/environments.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EnvironmentsModule } from './environments/environments.module';
     CommonModule,
     VoiceModule,
     EnvironmentsModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
