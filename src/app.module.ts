@@ -13,6 +13,7 @@ import { VoiceModule } from './voice/voice.module';
 import { DatabaseModule } from './database/database.module';
 import { EnvironmentsModule } from './environments/environments.module';
 import { IntegrationsModule } from './integrations/integrations.module';
+import { DependencyInferenceModule } from './workflows/dependency-inference/dependency-inference.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     VoiceModule,
     EnvironmentsModule,
     IntegrationsModule,
+    DependencyInferenceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
