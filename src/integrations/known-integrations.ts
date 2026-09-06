@@ -12,6 +12,11 @@ export interface KnownIntegration {
   label: string;
   defaultEnabled: boolean;
   requiredEnvVars: string[];
+  // For integrations whose credentials live in a per-Environment variable
+  // (Postman-style, see goal.md §3.4) rather than a raw process.env var —
+  // requiredEnvVars doesn't apply to those, so surface the expectation
+  // here instead.
+  configNote?: string;
 }
 
 export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
@@ -34,5 +39,16 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
     label: 'AI (LangChain — disabled by default, see goal.md §4)',
     defaultEnabled: false,
     requiredEnvVars: ['OPENAI_API_KEY'],
+  },
+  {
+    id: 'outlook',
+    label: 'Outlook / Microsoft Graph (draft-only — never sends or deletes)',
+    defaultEnabled: false,
+    requiredEnvVars: [],
+    configNote:
+      'Add an auto_refresh_token Environment variable (default name ' +
+      'OUTLOOK_GRAPH_TOKEN) pointed at your Azure AD app registration\'s ' +
+      'client-credentials token endpoint, scoped to Mail.ReadWrite and ' +
+      'Mail.Read only — never grant Mail.Send.',
   },
 ];

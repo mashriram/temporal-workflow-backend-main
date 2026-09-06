@@ -62,6 +62,11 @@ export class IntegrationsService implements OnModuleInit {
     const known = KNOWN_INTEGRATIONS.find((k) => k.id === row.id);
     const requiredEnvVars = known?.requiredEnvVars ?? [];
     const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
-    return { ...row, requiredEnvVars, missingEnvVars };
+    return {
+      ...row,
+      requiredEnvVars,
+      missingEnvVars,
+      configNote: known?.configNote,
+    };
   }
 }
