@@ -14,7 +14,10 @@ import {
 import { WorkflowsService } from './workflows.service';
 import { DeployWorkflowDto } from './dto/deploy-workflow.dto';
 import { CreateWorkflowDto } from './dto/create-workflow.dto';
-import { CurrentUser, type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../auth/decorators/current-user.decorator';
 
 @Controller('workflows')
 export class WorkflowsController {

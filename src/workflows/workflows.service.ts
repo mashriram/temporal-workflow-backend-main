@@ -1,7 +1,14 @@
-import { Injectable, Inject, NotFoundException, Logger, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  Logger,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Client, ScheduleOverlapPolicy } from '@temporalio/client';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { randomBytes } from 'crypto';
 import { WorkflowDefinition } from './entities/workflow-definition.entity';
 import { WorkflowRun } from './entities/workflow-run.entity';
 import { WorkflowVersion } from './entities/workflow-version.entity';
@@ -49,7 +56,12 @@ export class WorkflowsService {
     });
 
     const saved = await this.workflowsRepository.save(workflow);
-    await this.recordVersion(saved.workflowId, saved.nodes, saved.edges, ownerId);
+    await this.recordVersion(
+      saved.workflowId,
+      saved.nodes,
+      saved.edges,
+      ownerId,
+    );
     return saved;
   }
 
@@ -331,6 +343,12 @@ export class WorkflowsService {
     // CASE B: WEBHOOK TRIGGER (Passive)
     // ---------------------------------------------------------
     else {
+      // Generated once, at first deploy — stays stable across
+      // redeploys so the caller's configured header doesn't need
+      // updating every time.
+      const webhookSecret =
+        workflow.webhookSecret || randomBytes(24).toString('hex');
+
       await this.workflowsRepository.update(
         { workflowId: workflowId },
         {
@@ -340,6 +358,7 @@ export class WorkflowsService {
           cronExpression: null,
           environmentId: environmentId ?? null,
           deployedGraph: executionSnapshot,
+          webhookSecret,
         },
       );
 
@@ -351,7 +370,8 @@ export class WorkflowsService {
         success: true,
         status: 'PUBLISHED',
         workflowId: workflowId,
-        message: `Workflow ready. POST to /api/webhooks/${workflowId}`,
+        message: `Workflow ready. POST to /api/webhooks/${workflowId} with header X-Webhook-Secret: ${webhookSecret}`,
+        webhookSecret,
         dashboardUrl: this.getTemporalUrl(workflowId),
       };
     }
@@ -372,7 +392,11 @@ export class WorkflowsService {
    * genuinely running workflow. Now resolves the real Temporal
    * workflowId/runId from the WorkflowRun table first.
    */
-  async getWorkflowStatus(workflowId: string, runId?: string, ownerId?: string) {
+  async getWorkflowStatus(
+    workflowId: string,
+    runId?: string,
+    ownerId?: string,
+  ) {
     const definition = await this.workflowsRepository.findOne({
       where: { workflowId },
     });

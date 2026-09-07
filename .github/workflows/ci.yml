@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build-and-test-sqljs:
+    name: Build + test (sql.js — office-machine target)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+        env:
+          DB_TYPE: sqljs
+
+  build-and-test-postgres:
+    name: Build + test (Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+        env:
+          DB_TYPE: postgres
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: postgres
+      - name: Verify the initial migration applies cleanly to a fresh database
+        run: npm run migration:run
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: postgres
+
+  lint:
+    name: Lint (informational — not yet a merge gate)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      # This codebase isn't lint-clean under @typescript-eslint's strict
+      # no-unsafe-* rules yet (pre-existing debt, mostly in older
+      # controller/service code). Surfacing that here for visibility
+      # without blocking merges until it's paid down deliberately.
+      - run: npm run lint
+        continue-on-error: true

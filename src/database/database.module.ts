@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { join } from 'path';
 import { WorkflowDefinition } from '../workflows/entities/workflow-definition.entity';
 import { WorkflowRun } from '../workflows/entities/workflow-run.entity';
 import { AuditLog } from '../audit/entities/audit.entity';
@@ -25,6 +26,15 @@ const ENTITIES = [
   WorkflowVersion,
 ];
 
+// This process is the schema owner: it's the only one of the three repos
+// that runs migrations. The engine points at the same physical database
+// with synchronize/migrationsRun both off in production — it trusts the
+// schema already exists (see engine's database.module.ts comment). Keep
+// entity column sets in lockstep regardless (implementation.md §10) —
+// migrations don't change that requirement, they just replace how the
+// resulting schema gets applied.
+const MIGRATIONS_GLOB = [join(__dirname, '..', 'migrations', '*.{js,ts}')];
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -37,7 +47,8 @@ const ENTITIES = [
           return {
             type: 'sqljs' as const,
             autoSave: true,
-            location: config.get<string>('DB_SQLJS_FILE') || './data/app.sqlite',
+            location:
+              config.get<string>('DB_SQLJS_FILE') || './data/app.sqlite',
             entities: ENTITIES,
             synchronize: true, // sql.js is disposable dev state — safe to sync.
           };
@@ -52,7 +63,8 @@ const ENTITIES = [
             password: config.get<string>('DB_PASSWORD'),
             sid: config.get<string>('DB_ORACLE_SID'),
             entities: ENTITIES,
-            synchronize: false, // never against Oracle — use migrations.
+            migrations: MIGRATIONS_GLOB,
+            synchronize: false, // never against Oracle — migrations only.
             migrationsRun: true,
           };
         }
@@ -65,9 +77,12 @@ const ENTITIES = [
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
           entities: ENTITIES,
-          // Disposable personal-dev Postgres only; real deployments should
-          // move to migrations once persisted data actually matters.
-          synchronize: config.get<string>('NODE_ENV') !== 'production',
+          migrations: MIGRATIONS_GLOB,
+          // Migrations own the Postgres schema now (implementation.md
+          // §11) — set DB_SYNCHRONIZE=true only for quick throwaway local
+          // experiments where running migrations would be friction.
+          synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
+          migrationsRun: config.get<string>('DB_SYNCHRONIZE') !== 'true',
         };
       },
     }),

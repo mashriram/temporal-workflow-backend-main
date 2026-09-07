@@ -42,7 +42,10 @@ export class IntegrationsService implements OnModuleInit {
     return this.withMissingConfig(row);
   }
 
-  async update(id: string, dto: { enabled?: boolean; settings?: Record<string, any> }) {
+  async update(
+    id: string,
+    dto: { enabled?: boolean; settings?: Record<string, any> },
+  ) {
     const row = await this.repo.findOne({ where: { id } });
     if (!row) throw new NotFoundException(`Integration '${id}' not found`);
     if (dto.enabled !== undefined) row.enabled = dto.enabled;

@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HealthController } from './health/health.controller';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { TemporalModule } from './temporal/temporal.module';
@@ -26,9 +28,13 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       isGlobal: true,
       load: [configuration],
       envFilePath: '.env',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       validationSchema: validationSchema,
     }),
+    // Global default: generous enough for normal UI polling
+    // (useWorkflowStatus polls every 5s). Auth and webhooks apply their
+    // own stricter @Throttle() overrides directly on those controllers.
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     DatabaseModule,
     WorkflowsModule,
     WebhooksModule,
@@ -43,9 +49,12 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     UploadsModule,
     AuthModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, HealthController],
   providers: [
     AppService,
+    // Order matters: rate-limit first (cheap, protects against floods
+    // regardless of auth outcome), then the JWT check.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })

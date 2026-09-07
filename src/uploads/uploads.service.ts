@@ -18,7 +18,11 @@ export class UploadsService {
     meta: { runId?: string; nodeId?: string; uploadedBy?: string },
   ) {
     const id = uuidv4();
-    const storagePath = await this.storage.save(id, file.originalname, file.buffer);
+    const storagePath = await this.storage.save(
+      id,
+      file.originalname,
+      file.buffer,
+    );
 
     const entity = this.repo.create({
       id,

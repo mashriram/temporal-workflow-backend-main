@@ -20,13 +20,27 @@ export interface KnownIntegration {
 }
 
 export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
-  { id: 'http', label: 'HTTP Request', defaultEnabled: true, requiredEnvVars: [] },
-  { id: 'postgres', label: 'PostgreSQL Query', defaultEnabled: true, requiredEnvVars: [] },
+  {
+    id: 'http',
+    label: 'HTTP Request',
+    defaultEnabled: true,
+    requiredEnvVars: [],
+  },
+  {
+    id: 'postgres',
+    label: 'PostgreSQL Query',
+    defaultEnabled: true,
+    requiredEnvVars: [],
+  },
   {
     id: 'twilio',
     label: 'Twilio (SMS / Voice)',
     defaultEnabled: false,
-    requiredEnvVars: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM_NUMBER'],
+    requiredEnvVars: [
+      'TWILIO_ACCOUNT_SID',
+      'TWILIO_AUTH_TOKEN',
+      'TWILIO_FROM_NUMBER',
+    ],
   },
   {
     id: 'sendgrid',
@@ -47,7 +61,7 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
     requiredEnvVars: [],
     configNote:
       'Add an auto_refresh_token Environment variable (default name ' +
-      'OUTLOOK_GRAPH_TOKEN) pointed at your Azure AD app registration\'s ' +
+      "OUTLOOK_GRAPH_TOKEN) pointed at your Azure AD app registration's " +
       'client-credentials token endpoint, scoped to Mail.ReadWrite and ' +
       'Mail.Read only — never grant Mail.Send.',
   },
@@ -58,7 +72,7 @@ export const KNOWN_INTEGRATIONS: KnownIntegration[] = [
     requiredEnvVars: [],
     configNote:
       'Add SERVICENOW_USERNAME (static) and SERVICENOW_PASSWORD (secret) ' +
-      'Environment variables for Basic Auth against your instance\'s ' +
+      "Environment variables for Basic Auth against your instance's " +
       'Table API; set the instance URL per-node.',
   },
   {

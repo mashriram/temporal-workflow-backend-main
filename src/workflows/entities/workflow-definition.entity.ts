@@ -97,6 +97,14 @@ export class WorkflowDefinition {
   @Column({ type: 'varchar', nullable: true })
   environmentId: string | null;
 
+  // Generated at first deploy (implementation.md §11: "per-workflow
+  // webhook secret + basic rate limit is enough for an internal tool").
+  // The webhook trigger endpoint is @Public() by necessity (called by
+  // external systems with no user token) — this is what actually gates
+  // it instead. Nullable so a never-deployed draft has none yet.
+  @Column({ type: 'varchar', nullable: true })
+  webhookSecret: string | null;
+
   // -----------------------------------------------------------------
   // 5. HISTORY
   // -----------------------------------------------------------------

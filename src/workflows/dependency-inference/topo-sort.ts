@@ -22,7 +22,10 @@ function collapseEdges(bindings: Binding[]): GraphEdge[] {
     const existing = byPair.get(key);
     if (existing) {
       existing.bindings.push(b);
-      existing.discoveryOrder = Math.max(existing.discoveryOrder, b.discoveryOrder);
+      existing.discoveryOrder = Math.max(
+        existing.discoveryOrder,
+        b.discoveryOrder,
+      );
     } else {
       byPair.set(key, {
         source: b.fromNodeId,
@@ -66,11 +69,19 @@ function kahn(
   const compareReady = (a: string, b: string) => {
     const ea = explicitOrder.get(a);
     const eb = explicitOrder.get(b);
-    if (ea !== null && ea !== undefined && eb !== null && eb !== undefined && ea !== eb) {
+    if (
+      ea !== null &&
+      ea !== undefined &&
+      eb !== null &&
+      eb !== undefined &&
+      ea !== eb
+    ) {
       return ea - eb;
     }
-    if (ea !== null && ea !== undefined && (eb === null || eb === undefined)) return -1;
-    if (eb !== null && eb !== undefined && (ea === null || ea === undefined)) return 1;
+    if (ea !== null && ea !== undefined && (eb === null || eb === undefined))
+      return -1;
+    if (eb !== null && eb !== undefined && (ea === null || ea === undefined))
+      return 1;
     return (originalOrder.get(a) ?? 0) - (originalOrder.get(b) ?? 0);
   };
 
@@ -90,7 +101,10 @@ function kahn(
 }
 
 /** DFS over the subgraph of unprocessed nodes to find one cycle's edges. */
-function findCycleEdges(unprocessed: Set<string>, edges: GraphEdge[]): GraphEdge[] | null {
+function findCycleEdges(
+  unprocessed: Set<string>,
+  edges: GraphEdge[],
+): GraphEdge[] | null {
   const adjacency = new Map<string, GraphEdge[]>();
   for (const id of unprocessed) adjacency.set(id, []);
   for (const e of edges) {
@@ -102,7 +116,9 @@ function findCycleEdges(unprocessed: Set<string>, edges: GraphEdge[]): GraphEdge
   const WHITE = 0,
     GRAY = 1,
     BLACK = 2;
-  const color = new Map<string, number>([...unprocessed].map((id) => [id, WHITE]));
+  const color = new Map<string, number>(
+    [...unprocessed].map((id) => [id, WHITE]),
+  );
   const pathEdges: GraphEdge[] = [];
 
   function dfs(nodeId: string): GraphEdge[] | null {
@@ -113,7 +129,8 @@ function findCycleEdges(unprocessed: Set<string>, edges: GraphEdge[]): GraphEdge
         // Found the back-edge that closes the cycle — walk pathEdges back
         // to where `edge.target` first entered the current path.
         const cycleStart = pathEdges.findIndex((e) => e.source === edge.target);
-        const cycle = cycleStart === -1 ? [edge] : [...pathEdges.slice(cycleStart), edge];
+        const cycle =
+          cycleStart === -1 ? [edge] : [...pathEdges.slice(cycleStart), edge];
         return cycle;
       }
       if (targetColor === WHITE) {
@@ -157,7 +174,12 @@ export function topoSortWithCycleBreak(
   // edges to remove before it's a DAG — this is a safety cap, not the
   // expected path.
   for (let attempt = 0; attempt <= nodeIds.length; attempt++) {
-    const { order, processed } = kahn(nodeIds, edges, explicitOrder, originalOrder);
+    const { order, processed } = kahn(
+      nodeIds,
+      edges,
+      explicitOrder,
+      originalOrder,
+    );
     if (processed.size === nodeIds.length) {
       return { order, edges, removed };
     }
@@ -170,7 +192,9 @@ export function topoSortWithCycleBreak(
       return { order: [...order, ...unprocessed], edges, removed };
     }
 
-    const offending = cycle.reduce((a, b) => (b.discoveryOrder > a.discoveryOrder ? b : a));
+    const offending = cycle.reduce((a, b) =>
+      b.discoveryOrder > a.discoveryOrder ? b : a,
+    );
     edges = edges.filter((e) => e !== offending);
     removed.push(offending);
   }

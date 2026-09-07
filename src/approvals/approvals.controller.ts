@@ -1,6 +1,9 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApprovalsService } from './approvals.service';
-import { CurrentUser, type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../auth/decorators/current-user.decorator';
 
 @Controller('workflow-runs')
 export class ApprovalsController {
@@ -24,10 +27,7 @@ export class ApprovalsController {
   }
 
   @Get(':runId/logs')
-  logs(
-    @Param('runId') runId: string,
-    @CurrentUser() user: CurrentUserPayload,
-  ) {
+  logs(@Param('runId') runId: string, @CurrentUser() user: CurrentUserPayload) {
     return this.approvalsService.findLogsForRun(runId, user.id);
   }
 }

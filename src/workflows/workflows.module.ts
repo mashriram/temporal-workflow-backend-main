@@ -9,7 +9,11 @@ import { IntegrationsModule } from 'src/integrations/integrations.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([WorkflowDefinition, WorkflowRun, WorkflowVersion]),
+    TypeOrmModule.forFeature([
+      WorkflowDefinition,
+      WorkflowRun,
+      WorkflowVersion,
+    ]),
     IntegrationsModule,
   ],
   controllers: [WorkflowsController],

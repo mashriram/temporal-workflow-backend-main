@@ -24,7 +24,8 @@ const HITL_APPROVAL_SIGNAL_NAME = 'HITL_APPROVAL';
 // a log line". This is a blunt, key-name-based net rather than a
 // schema-aware one (no per-integration schema is available here), but it
 // covers the common cases (Authorization headers, api keys, passwords).
-const SECRET_KEY_PATTERN = /pass(word)?|secret|token|api[-_]?key|authorization/i;
+const SECRET_KEY_PATTERN =
+  /pass(word)?|secret|token|api[-_]?key|authorization/i;
 
 function redact(value: any): any {
   if (Array.isArray(value)) return value.map(redact);
@@ -61,10 +62,14 @@ export class ApprovalsService {
       relations: ['definition'],
     });
     if (!run) {
-      throw new NotFoundException(`No WorkflowRun found for Temporal run ${runId}`);
+      throw new NotFoundException(
+        `No WorkflowRun found for Temporal run ${runId}`,
+      );
     }
     if (run.definition?.ownerId !== ownerId) {
-      throw new ForbiddenException("You don't have access to this workflow run");
+      throw new ForbiddenException(
+        "You don't have access to this workflow run",
+      );
     }
     return run;
   }

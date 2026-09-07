@@ -46,7 +46,12 @@ export class ApprovalRequest {
   @CreateDateColumn()
   requestedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  // A nullable `Date | null` union reflects as `Object` via TS's
+  // design:type metadata (unions can't be represented as one runtime
+  // constructor) — sql.js's driver rejects that outright, and 'timestamp'
+  // isn't valid for sql.js either (Postgres/Oracle only). 'datetime' is
+  // the one explicit type sql.js/Postgres/Oracle all accept here.
+  @Column({ type: 'datetime', nullable: true })
   resolvedAt: Date | null;
 
   @Column({ type: 'varchar', nullable: true })

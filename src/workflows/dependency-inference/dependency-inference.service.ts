@@ -71,7 +71,9 @@ export class DependencyInferenceService {
           // drop a new suggestion over something the user already wired
           // by hand — auto-wire only ever ADDS, never silently undoes
           // manual work (goal.md §3.1.4).
-          discoveryOrder: isExisting ? -1_000_000 + discoveryOrder++ : discoveryOrder++,
+          discoveryOrder: isExisting
+            ? -1_000_000 + discoveryOrder++
+            : discoveryOrder++,
         });
       }
     }
@@ -118,7 +120,12 @@ export class DependencyInferenceService {
     const nodeIds = nodes.map((n) => n.id);
     const explicitOrder = new Map(nodes.map((n) => [n.id, n.explicitOrder]));
     const originalOrder = new Map(nodes.map((n) => [n.id, n.order]));
-    return topoSortWithCycleBreak(nodeIds, bindings, explicitOrder, originalOrder);
+    return topoSortWithCycleBreak(
+      nodeIds,
+      bindings,
+      explicitOrder,
+      originalOrder,
+    );
   }
 
   private buildResult(
@@ -135,7 +142,10 @@ export class DependencyInferenceService {
     // understands, so an imported workflow is runnable immediately (not
     // just visually wired) — see goal.md §3.1 "auto-populate B's
     // reference to A's output".
-    const rewritesByNode = new Map<string, Array<{ from: string; to: string }>>();
+    const rewritesByNode = new Map<
+      string,
+      Array<{ from: string; to: string }>
+    >();
     for (const b of allBindings) {
       if (!b.viaPlaceholder) continue;
       const list = rewritesByNode.get(b.toNodeId) || [];

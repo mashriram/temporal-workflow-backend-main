@@ -8,12 +8,16 @@ const PLACEHOLDER_RE = /\{\{\s*([\w.]+)\s*\}\}/g;
 // empty strings" guidance.
 function isMeaningfulValue(value: unknown): value is string | number {
   if (typeof value === 'string') return value.trim().length >= 3;
-  if (typeof value === 'number') return !Number.isInteger(value) || Math.abs(value) >= 100;
+  if (typeof value === 'number')
+    return !Number.isInteger(value) || Math.abs(value) >= 100;
   return false;
 }
 
 /** Flattens a parsed JSON value into (dotPath, value) pairs. */
-function flatten(obj: unknown, prefix = ''): Array<{ path: string; value: unknown }> {
+function flatten(
+  obj: unknown,
+  prefix = '',
+): Array<{ path: string; value: unknown }> {
   const out: Array<{ path: string; value: unknown }> = [];
   if (obj === null || obj === undefined) return out;
   if (typeof obj !== 'object') {
@@ -52,11 +56,16 @@ export function inferBindings(nodes: InferredNode[]): Binding[] {
   const bindings: Binding[] = [];
   let discoveryOrder = 0;
 
-  const anyPlaceholderExists = nodes.some((n) => PLACEHOLDER_RE.test(n.rawText));
+  const anyPlaceholderExists = nodes.some((n) =>
+    PLACEHOLDER_RE.test(n.rawText),
+  );
   // .test() with a global regex mutates lastIndex — reset before reuse.
   PLACEHOLDER_RE.lastIndex = 0;
 
-  const flattenedByNode = new Map<string, Array<{ path: string; value: unknown }>>();
+  const flattenedByNode = new Map<
+    string,
+    Array<{ path: string; value: unknown }>
+  >();
   for (const node of nodes) {
     flattenedByNode.set(
       node.id,
@@ -69,7 +78,12 @@ export function inferBindings(nodes: InferredNode[]): Binding[] {
       const matches = [...consumer.rawText.matchAll(PLACEHOLDER_RE)];
       for (const match of matches) {
         const placeholderName = match[1];
-        const producer = findProducerForKey(nodes, flattenedByNode, consumer.id, placeholderName);
+        const producer = findProducerForKey(
+          nodes,
+          flattenedByNode,
+          consumer.id,
+          placeholderName,
+        );
         if (producer) {
           bindings.push({
             fromNodeId: producer.nodeId,
@@ -126,7 +140,10 @@ function findProducerForKey(
   return null;
 }
 
-function fieldForMatch(node: InferredNode, matchedText: string): 'url' | 'headers' | 'body' {
+function fieldForMatch(
+  node: InferredNode,
+  matchedText: string,
+): 'url' | 'headers' | 'body' {
   if (node.url.includes(matchedText)) return 'url';
   if (node.body && node.body.includes(matchedText)) return 'body';
   return 'headers';

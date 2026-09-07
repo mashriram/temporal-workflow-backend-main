@@ -1,12 +1,15 @@
 import { Controller, Post, Param, Body, Headers, Query } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { WebhooksService } from './webhooks.service';
 import type { IncomingHttpHeaders } from 'http';
 import { Public } from '../auth/decorators/public.decorator';
 
 // Called by external systems (or curl during dev), never by a logged-in
-// browser user — exempt from the global JwtAuthGuard. Per implementation.md
-// §9 this should eventually carry a per-workflow webhook secret instead;
-// not yet built (see Phase 8+ production-readiness checklist).
+// browser user — exempt from the global JwtAuthGuard. Gated instead by a
+// per-workflow secret (X-Webhook-Secret header) generated at deploy time,
+// plus a basic rate limit — implementation.md §11's explicit
+// recommendation for this exact endpoint.
+@Throttle({ default: { limit: 30, ttl: 60_000 } })
 @Controller('webhooks')
 export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}
@@ -25,10 +28,10 @@ export class WebhooksController {
     // Type: Query params are typically key-value strings
     @Query() query: Record<string, string>,
   ) {
-    return this.webhooksService.triggerWebhook(workflowId, {
-      body,
-      headers,
-      query,
-    });
+    return this.webhooksService.triggerWebhook(
+      workflowId,
+      { body, headers, query },
+      headers['x-webhook-secret'] as string | undefined,
+    );
   }
 }

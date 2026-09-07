@@ -12,11 +12,7 @@ export type NodeType =
   | 'send_sms_twilio';
 
 export type NodeStatus =
-  | 'idle'
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed';
+  'idle' | 'pending' | 'running' | 'completed' | 'failed';
 
 export type RouterOperator = '==' | '!=' | '>' | '<' | 'contains';
 

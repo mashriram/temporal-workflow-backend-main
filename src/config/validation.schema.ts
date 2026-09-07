@@ -42,6 +42,12 @@ export const validationSchema = Joi.object({
     otherwise: Joi.optional(),
   }),
 
+  // Escape hatch back to the old synchronize:true behavior for Postgres/
+  // Oracle, for a quick throwaway local database where running migrations
+  // is friction. Migrations own the schema by default now — see
+  // database.module.ts and src/migrations/.
+  DB_SYNCHRONIZE: Joi.string().valid('true', 'false').optional(),
+
   // Secrets-at-rest key for EnvironmentVariable encryption. Optional so dev
   // boots don't hard-fail, but SecretCipherService logs a loud warning and
   // uses an insecure fallback if this is unset — never rely on that in prod.

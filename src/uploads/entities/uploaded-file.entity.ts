@@ -1,4 +1,10 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  CreateDateColumn,
+  BeforeInsert,
+} from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
 @Entity('uploaded_files')

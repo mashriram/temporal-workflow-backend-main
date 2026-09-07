@@ -138,7 +138,8 @@ export class EnvironmentsService {
     const variable = await this.variableRepo.findOne({
       where: { id: variableId, environmentId },
     });
-    if (!variable) throw new NotFoundException(`Variable ${variableId} not found`);
+    if (!variable)
+      throw new NotFoundException(`Variable ${variableId} not found`);
     await this.variableRepo.remove(variable);
     return { success: true };
   }
@@ -218,9 +219,7 @@ export class EnvironmentsService {
     );
 
     variable.cachedValue = fresh;
-    variable.cachedExpiresAtMs = String(
-      now + refreshConfig.ttlSeconds * 1000,
-    );
+    variable.cachedExpiresAtMs = String(now + refreshConfig.ttlSeconds * 1000);
     await this.variableRepo.save(variable);
 
     return fresh;

@@ -12,9 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Environment } from './environment.entity';
 
 export type EnvironmentVariableKind =
-  | 'static'
-  | 'secret'
-  | 'auto_refresh_token';
+  'static' | 'secret' | 'auto_refresh_token';
 
 // User-defined recipe for a variable whose value is a bearer token that
 // expires and must be transparently refreshed (e.g. every 30 minutes).

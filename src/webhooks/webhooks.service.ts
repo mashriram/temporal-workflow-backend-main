@@ -3,9 +3,11 @@ import {
   Inject,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
+import { timingSafeEqual } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +32,11 @@ export class WebhooksService {
     private readonly integrationsService: IntegrationsService,
   ) {}
 
-  async triggerWebhook(workflowId: string, context: WebhookContext) {
+  async triggerWebhook(
+    workflowId: string,
+    context: WebhookContext,
+    providedSecret: string | undefined,
+  ) {
     this.logger.log(`[Webhook] Processing trigger for: ${workflowId}`);
 
     // 1. Fetch & Validate Definition
@@ -40,6 +46,21 @@ export class WebhooksService {
 
     if (!definition) {
       throw new NotFoundException(`Workflow ${workflowId} not found`);
+    }
+
+    // Per-workflow secret (implementation.md §11) — this endpoint is
+    // necessarily @Public() since it's called by external systems with
+    // no user token, so this is the actual access control. Constant-time
+    // compare to avoid a timing side-channel on the secret.
+    if (definition.webhookSecret) {
+      const expected = Buffer.from(definition.webhookSecret);
+      const provided = Buffer.from(providedSecret || '');
+      const valid =
+        expected.length === provided.length &&
+        timingSafeEqual(expected, provided);
+      if (!valid) {
+        throw new UnauthorizedException('Invalid or missing webhook secret');
+      }
     }
 
     if (!definition.isActive) {

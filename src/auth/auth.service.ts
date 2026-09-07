@@ -32,9 +32,9 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     const user = this.userRepo.create({ username: dto.username, passwordHash });
-    await this.userRepo.save(user);
+    const saved = await this.userRepo.save(user);
 
-    return this.issueToken(user);
+    return this.issueToken(saved);
   }
 
   async login(dto: AuthCredentialsDto) {

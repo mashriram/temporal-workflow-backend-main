@@ -11,14 +11,20 @@ import { EnvironmentsService } from './environments.service';
 import { CreateEnvironmentDto } from './dto/create-environment.dto';
 import { UpsertVariableDto } from './dto/upsert-variable.dto';
 import { Public } from '../auth/decorators/public.decorator';
-import { CurrentUser, type CurrentUserPayload } from '../auth/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type CurrentUserPayload,
+} from '../auth/decorators/current-user.decorator';
 
 @Controller('environments')
 export class EnvironmentsController {
   constructor(private readonly environmentsService: EnvironmentsService) {}
 
   @Post()
-  create(@Body() dto: CreateEnvironmentDto, @CurrentUser() user: CurrentUserPayload) {
+  create(
+    @Body() dto: CreateEnvironmentDto,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
     return this.environmentsService.create(dto, user.id);
   }
 
@@ -76,10 +82,7 @@ export class EnvironmentsController {
   @Public()
   @Post(':id/resolve')
   async resolve(@Param('id') id: string, @Body() body: { key: string }) {
-    const value = await this.environmentsService.resolveVariable(
-      id,
-      body.key,
-    );
+    const value = await this.environmentsService.resolveVariable(id, body.key);
     return { key: body.key, value };
   }
 }

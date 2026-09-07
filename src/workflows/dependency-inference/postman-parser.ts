@@ -68,7 +68,9 @@ export function parsePostmanCollection(
   return flat.map((item, index) => {
     const name = item.name || `Request ${index + 1}`;
     const orderMatch = name.match(ORDER_MARKER_RE);
-    const explicitOrder = orderMatch ? Number.parseInt(orderMatch[1], 10) : null;
+    const explicitOrder = orderMatch
+      ? Number.parseInt(orderMatch[1], 10)
+      : null;
 
     const method = (item.request?.method || 'GET').toUpperCase();
     const url =
